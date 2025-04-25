@@ -4,6 +4,7 @@ import type {
   InvocationContext,
 } from "@azure/functions"
 import { app } from "@azure/functions"
+import { config } from "../config/env"
 
 /**
  * @swagger
@@ -41,9 +42,8 @@ export const healthCheck = app.http("health", {
     return {
       status: 200,
       jsonBody: {
-        status: "healthy",
+        status: `Sample App is running(${config.appEnv})`,
         timestamp: new Date().toISOString(),
-        version: process.env.npm_package_version || "1.0.0",
       },
     }
   },

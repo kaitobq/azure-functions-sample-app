@@ -1,0 +1,12 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME_VERSION": "~18",
+    "WEBSITE_NODE_DEFAULT_VERSION": "~18",
+    "APP_ENV": "development",
+    "SWAGGER_BASIC_AUTH_USERNAME": "admin",
+    "SWAGGER_BASIC_AUTH_PASSWORD": "password"
+  }
+}

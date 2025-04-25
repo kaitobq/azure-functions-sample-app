@@ -5,6 +5,7 @@ import type {
 } from "@azure/functions"
 import { app } from "@azure/functions"
 import * as swaggerJsdoc from "swagger-jsdoc"
+import { config } from "../config/env"
 
 const options: swaggerJsdoc.Options = {
   definition: {
@@ -26,13 +27,52 @@ const options: swaggerJsdoc.Options = {
 
 const swaggerSpec = swaggerJsdoc(options)
 
+const USERNAME = process.env.SWAGGER_BASIC_AUTH_USERNAME
+const PASSWORD = process.env.SWAGGER_BASIC_AUTH_PASSWORD
+
 export const swaggerUI = app.http("swagger", {
   methods: ["GET"],
   authLevel: "anonymous",
   handler: async (
-    _request: HttpRequest,
+    request: HttpRequest,
     _context: InvocationContext,
   ): Promise<HttpResponseInit> => {
+    if (config.appEnv !== "development") {
+      return {
+        status: 404,
+      }
+    }
+
+    // Basic認証ヘッダーのチェック
+    const authHeader = request.headers.get("authorization")
+    if (!authHeader || !authHeader.startsWith("Basic ")) {
+      return {
+        status: 401,
+        headers: {
+          "WWW-Authenticate": 'Basic realm="Swagger UI"',
+        },
+        body: "Unauthorized",
+      }
+    }
+
+    // Base64デコードして認証情報を取得
+    const base64Credentials = authHeader.split(" ")[1]
+    const credentials = Buffer.from(base64Credentials, "base64").toString(
+      "ascii",
+    )
+    const [username, password] = credentials.split(":")
+
+    // 認証情報の検証
+    if (username !== USERNAME || password !== PASSWORD) {
+      return {
+        status: 401,
+        headers: {
+          "WWW-Authenticate": 'Basic realm="Swagger UI"',
+        },
+        body: "Unauthorized",
+      }
+    }
+
     const html = `
       <!DOCTYPE html>
       <html lang="ja">
