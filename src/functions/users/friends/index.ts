@@ -4,8 +4,10 @@ import type {
   InvocationContext,
 } from "@azure/functions"
 import { app } from "@azure/functions"
+import { AppError } from "../../../errors/appError"
+import { errorHandlerMiddleware } from "../../../middleware/errorHandlerMiddleware"
 import { UserService } from "../../../services/userService"
-import type { ErrorResponse, FriendsResponse } from "../types"
+import type { FriendsResponse } from "../types"
 
 /**
  * @swagger
@@ -37,10 +39,10 @@ export const getFriends = app.http("getUserFriends", {
     request: HttpRequest,
     context: InvocationContext,
   ): Promise<HttpResponseInit> => {
-    try {
-      const userId = request.params.id
-      const page = parseInt(request.query.get("page") || "1")
-      const limit = parseInt(request.query.get("limit") || "10")
+    return errorHandlerMiddleware(request, context, async (req, ctx) => {
+      const userId = req.params.id
+      const page = parseInt(req.query.get("page") || "1")
+      const limit = parseInt(req.query.get("limit") || "10")
 
       const userService = new UserService()
       const friends = await userService.getUserFriends(userId, { page, limit })
@@ -49,16 +51,7 @@ export const getFriends = app.http("getUserFriends", {
         status: 200,
         jsonBody: friends as FriendsResponse,
       }
-    } catch (error) {
-      context.error(`友達リスト取得エラー: ${error}`)
-      return {
-        status: 500,
-        jsonBody: {
-          error: "Internal Server Error",
-          message: "サーバーエラーが発生しました",
-        } as ErrorResponse,
-      }
-    }
+    })
   },
 })
 
@@ -76,21 +69,22 @@ export const addFriend = app.http("addUserFriend", {
     request: HttpRequest,
     context: InvocationContext,
   ): Promise<HttpResponseInit> => {
-    try {
-      const userId = request.params.id
-      const friendId = request.params.friendId
+    return errorHandlerMiddleware(request, context, async (req, ctx) => {
+      const userId = req.params.id
+      const friendId = req.params.friendId
 
       const userService = new UserService()
       const success = await userService.addFriend(userId, friendId)
 
       if (!success) {
-        return {
-          status: 400,
-          jsonBody: {
-            error: "Bad Request",
-            message: "友達の追加に失敗しました",
-          } as ErrorResponse,
-        }
+        throw AppError.businessLogic(
+          "友達の追加に失敗しました",
+          "FRIEND_ADD_FAILED",
+          {
+            userId,
+            friendId,
+          },
+        )
       }
 
       return {
@@ -99,15 +93,6 @@ export const addFriend = app.http("addUserFriend", {
           message: "友達を追加しました",
         },
       }
-    } catch (error) {
-      context.error(`友達追加エラー: ${error}`)
-      return {
-        status: 500,
-        jsonBody: {
-          error: "Internal Server Error",
-          message: "サーバーエラーが発生しました",
-        } as ErrorResponse,
-      }
-    }
+    })
   },
 })

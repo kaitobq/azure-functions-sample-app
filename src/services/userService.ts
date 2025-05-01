@@ -1,3 +1,4 @@
+import { AppError } from "../errors/appError"
 import type { Friend, FriendsResponse, User } from "../functions/users/types"
 
 // モックデータ
@@ -37,29 +38,65 @@ const mockFriends: Record<string, Friend[]> = {
 
 export class UserService {
   async getUser(id: string): Promise<User | null> {
-    return mockUsers.find((user) => user.id === id) || null
+    const user = mockUsers.find((u) => u.id === id)
+    return user || null
   }
 
   async getUserFriends(
     userId: string,
-    options: { page: number; limit: number } = { page: 1, limit: 10 },
+    options: { page: number; limit: number },
   ): Promise<FriendsResponse> {
+    const user = await this.getUser(userId)
+    if (!user) {
+      throw AppError.notFound("ユーザーが見つかりません", "USER_NOT_FOUND", {
+        userId,
+      })
+    }
+
     const friends = mockFriends[userId] || []
-    const start = (options.page - 1) * options.limit
-    const end = start + options.limit
+    const { page, limit } = options
+    const start = (page - 1) * limit
+    const end = start + limit
+    const paginatedFriends = friends.slice(start, end)
 
     return {
-      friends: friends.slice(start, end),
+      friends: paginatedFriends,
       pagination: {
-        page: options.page,
-        limit: options.limit,
         total: friends.length,
+        page,
+        limit,
+        hasMore: end < friends.length,
       },
     }
   }
 
   async addFriend(userId: string, friendId: string): Promise<boolean> {
-    // モック実装では常に成功を返す
+    const user = await this.getUser(userId)
+    if (!user) {
+      throw AppError.notFound("ユーザーが見つかりません", "USER_NOT_FOUND", {
+        userId,
+      })
+    }
+
+    const friend = await this.getUser(friendId)
+    if (!friend) {
+      throw AppError.notFound(
+        "追加するユーザーが見つかりません",
+        "FRIEND_NOT_FOUND",
+        { friendId },
+      )
+    }
+
+    const userFriends = mockFriends[userId] || []
+    if (userFriends.some((f) => f.id === friendId)) {
+      throw AppError.businessLogic(
+        "すでに友達として登録されています",
+        "FRIEND_ALREADY_EXISTS",
+        { userId, friendId },
+      )
+    }
+
+    // 実際のアプリケーションではここでDBに保存する処理を行う
     return true
   }
 }
