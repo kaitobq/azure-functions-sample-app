@@ -1,5 +1,7 @@
+import { injectable } from "inversify"
 import { AppError } from "../errors/appError"
 import type { Friend, FriendsResponse, User } from "../functions/users/types"
+import type { IUserService } from "./interfaces/userServiceInterface"
 
 // モックデータ
 const mockUsers: User[] = [
@@ -36,7 +38,8 @@ const mockFriends: Record<string, Friend[]> = {
   ],
 }
 
-export class UserService {
+@injectable()
+export class UserService implements IUserService {
   async getUser(id: string): Promise<User | null> {
     const user = mockUsers.find((u) => u.id === id)
     return user || null
@@ -44,7 +47,7 @@ export class UserService {
 
   async getUserFriends(
     userId: string,
-    options: { page: number; limit: number },
+    options: { page: number; limit: number } = { page: 1, limit: 10 },
   ): Promise<FriendsResponse> {
     const user = await this.getUser(userId)
     if (!user) {
@@ -54,17 +57,16 @@ export class UserService {
     }
 
     const friends = mockFriends[userId] || []
-    const { page, limit } = options
-    const start = (page - 1) * limit
-    const end = start + limit
+    const start = (options.page - 1) * options.limit
+    const end = start + options.limit
     const paginatedFriends = friends.slice(start, end)
 
     return {
       friends: paginatedFriends,
       pagination: {
         total: friends.length,
-        page,
-        limit,
+        page: options.page,
+        limit: options.limit,
         hasMore: end < friends.length,
       },
     }

@@ -4,7 +4,7 @@ import type {
   InvocationContext,
 } from "@azure/functions"
 import { app } from "@azure/functions"
-import * as swaggerJsdoc from "swagger-jsdoc"
+import swaggerJsdoc from "swagger-jsdoc"
 import { config } from "../config/env"
 
 const options: swaggerJsdoc.Options = {
@@ -17,7 +17,7 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: `http://localhost:7071`,
+        url: "http://localhost:7071",
         description: "Local development server",
       },
     ],

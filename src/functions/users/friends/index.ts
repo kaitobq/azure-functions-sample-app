@@ -4,10 +4,10 @@ import type {
   InvocationContext,
 } from "@azure/functions"
 import { app } from "@azure/functions"
-import { AppError } from "../../../errors/appError"
+import { container } from "../../../config/container"
 import { errorHandlerMiddleware } from "../../../middleware/errorHandlerMiddleware"
-import { UserService } from "../../../services/userService"
-import type { FriendsResponse } from "../types"
+import type { IUserService } from "../../../services/interfaces/userServiceInterface"
+import type { ErrorResponse, FriendsResponse } from "../types"
 
 /**
  * @swagger
@@ -44,7 +44,7 @@ export const getFriends = app.http("getUserFriends", {
       const page = parseInt(req.query.get("page") || "1")
       const limit = parseInt(req.query.get("limit") || "10")
 
-      const userService = new UserService()
+      const userService = container.get<IUserService>("IUserService")
       const friends = await userService.getUserFriends(userId, { page, limit })
 
       return {
@@ -73,18 +73,17 @@ export const addFriend = app.http("addUserFriend", {
       const userId = req.params.id
       const friendId = req.params.friendId
 
-      const userService = new UserService()
+      const userService = container.get<IUserService>("IUserService")
       const success = await userService.addFriend(userId, friendId)
 
       if (!success) {
-        throw AppError.businessLogic(
-          "友達の追加に失敗しました",
-          "FRIEND_ADD_FAILED",
-          {
-            userId,
-            friendId,
-          },
-        )
+        return {
+          status: 400,
+          jsonBody: {
+            error: "Bad Request",
+            message: "友達の追加に失敗しました",
+          } as ErrorResponse,
+        }
       }
 
       return {

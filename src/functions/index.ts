@@ -1,2 +1,3 @@
 export * from "./health"
-export * from "./swagger"
+export * from "./users"
+export * from "./users/friends"

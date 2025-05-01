@@ -4,10 +4,10 @@ import type {
   InvocationContext,
 } from "@azure/functions"
 import { app } from "@azure/functions"
-import { AppError } from "../../errors/appError"
+import { container } from "../../config/container"
 import { errorHandlerMiddleware } from "../../middleware/errorHandlerMiddleware"
-import { UserService } from "../../services/userService"
-import type { UserResponse } from "./types"
+import type { IUserService } from "../../services/interfaces/userServiceInterface"
+import type { ErrorResponse, UserResponse } from "./types"
 
 /**
  * @swagger
@@ -36,13 +36,17 @@ export const getUser = app.http("getUser", {
   ): Promise<HttpResponseInit> => {
     return errorHandlerMiddleware(request, context, async (req, ctx) => {
       const userId = req.params.id
-      const userService = new UserService()
+      const userService = container.get<IUserService>("IUserService")
       const user = await userService.getUser(userId)
 
       if (!user) {
-        throw AppError.notFound("ユーザーが見つかりません", "USER_NOT_FOUND", {
-          userId,
-        })
+        return {
+          status: 404,
+          jsonBody: {
+            error: "Not Found",
+            message: "ユーザーが見つかりません",
+          } as ErrorResponse,
+        }
       }
 
       return {
