@@ -1,4 +1,5 @@
-import type { FriendsResponse, User } from "../../functions/users/types"
+import { FriendsResponse } from "../../functions/users/types";
+import { User } from "../../models/entities"; // Friend import removed
 
 export interface IUserService {
   getUser(id: string): Promise<User | null>

@@ -43,8 +43,11 @@ export const getUser = app.http("getUser", {
         return {
           status: 404,
           jsonBody: {
-            error: "Not Found",
+          error: {
+            type: ErrorType.NOT_FOUND_ERROR,
+            code: "USER_NOT_FOUND",
             message: "ユーザーが見つかりません",
+          },
           } as ErrorResponse,
         }
       }
