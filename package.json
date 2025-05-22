@@ -9,7 +9,7 @@
     "clean": "rimraf dist",
     "prestart": "npm run clean && npm run build",
     "start": "func start",
-    "test": "echo \"No tests yet...\"",
+    "test": "jest",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "format": "prettier --check .",
@@ -23,15 +23,18 @@
     "zod": "^3.24.3"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.14",
     "@types/node": "18.x",
     "@typescript-eslint/eslint-plugin": "^8.31.0",
     "@typescript-eslint/parser": "^8.31.0",
     "azure-functions-core-tools": "^4.x",
     "eslint": "^9.25.1",
     "eslint-config-prettier": "10.1.2",
+    "jest": "^29.7.0",
     "prettier": "3.5.3",
     "prettier-plugin-organize-imports": "^4.1.0",
     "rimraf": "^5.0.0",
+    "ts-jest": "^29.3.4",
     "typescript": "^5.8.3"
   }
 }

@@ -1,6 +1,7 @@
 import { injectable } from "inversify"
 import { AppError } from "../errors/appError"
-import type { Friend, FriendsResponse, User } from "../functions/users/types"
+import type { FriendOutput, FriendsResponse } from "../functions/users/types" // FriendOutput imported
+import type { User } from "../models/entities" // Friend import removed
 import type { IUserService } from "./interfaces/userServiceInterface"
 
 // モックデータ
@@ -21,7 +22,9 @@ const mockUsers: User[] = [
   },
 ]
 
-const mockFriends: Record<string, Friend[]> = {
+// TODO: Friend型を更新したら、ここのmockFriendsの型定義も合わせる必要があるかもしれません。
+// The mockFriends data structure already aligns with FriendOutput
+const mockFriends: Record<string, FriendOutput[]> = {
   "1": [
     {
       id: "2",

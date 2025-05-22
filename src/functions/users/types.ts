@@ -1,19 +1,13 @@
-export interface User {
-  id: string
-  name: string
-  email: string
-  createdAt: string
-  updatedAt: string
-}
+import { User } from "../../../models/entities";
 
-export interface Friend {
-  id: string
-  name: string
-  friendshipDate: string
+export interface FriendOutput {
+  id: string; // User ID of the friend
+  name: string;
+  friendshipDate: string; // Or Date, keep as string for now to match mock data
 }
 
 export interface FriendsResponse {
-  friends: Friend[]
+  friends: FriendOutput[];
   pagination: {
     page: number
     limit: number
@@ -26,7 +20,4 @@ export interface UserResponse {
   user: User
 }
 
-export interface ErrorResponse {
-  error: string
-  message: string
-}
+import { ErrorResponse } from "../../../errors/types";

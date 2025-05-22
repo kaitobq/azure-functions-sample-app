@@ -80,8 +80,11 @@ export const addFriend = app.http("addUserFriend", {
         return {
           status: 400,
           jsonBody: {
-            error: "Bad Request",
+          error: {
+            type: ErrorType.VALIDATION_ERROR,
+            code: "ADD_FRIEND_FAILED",
             message: "友達の追加に失敗しました",
+          },
           } as ErrorResponse,
         }
       }
